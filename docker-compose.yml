@@ -1,30 +1,35 @@
-version: '3.8'
-
-networks:
-  postgres:
-
 services:
   mailarchive-app:
-    build: .
+    image: s1t5/mailarchiver:latest
     restart: always
+    environment:
+      # Database Connection
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=MailArchiver;Username=root;Password=dAniela123$;
+
+      # Authentication Settings
+      - Authentication__Username=admin
+      - Authentication__Password=dAniela123$
+
+      # TimeZone Settings
+      - TimeZone__DisplayTimeZoneId=Europe/Vienna
     ports:
       - "5000:5000"
     networks:
       - postgres
     volumes:
-      - ./appsettings.json:/app/appsettings.json
-      - ./logs:/app/logs
       - ./data-protection-keys:/app/DataProtection-Keys
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
 
   postgres:
-    image: postgres:14-alpine
+    image: postgres:17-alpine
     restart: always
     environment:
       POSTGRES_DB: MailArchiver
-      POSTGRES_USER: mailuser
-      POSTGRES_PASSWORD: masterkey
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: dAniela123$
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     networks:
@@ -35,3 +40,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+networks:
+  postgres:
